@@ -1,5 +1,5 @@
 module Lib
-    ( getRss
+    ( parseRss
     ) where
 
 import Text.Regex.TDFA ((=~))
@@ -7,16 +7,17 @@ import Data.List (intercalate)
 import Network.Curl      (curlGetString)
 import Network.Curl.Opts
 import Text.Feed.Import (parseFeedString)
-import Text.Feed.Query (getFeedItems, getItemTitle)
+import Text.Feed.Query (getFeedItems, getItemTitle, getItemLink)
 import Codec.Binary.UTF8.String (encodeString)
 
 feedUrl = "http://techblog.holidaycheck.com/feed.xml"
 
-getRss :: IO String
-getRss = do
+parseRss :: IO (String, String)
+parseRss = do
     (_,feed) <- curlGetString feedUrl []
-    return $ getMsg $ head $ getItems feed
+    let item = head $ getItems feed
+    return (getTitle item, getLink item)
     where
         getItems = maybe (error "rss parsing failed!") getFeedItems . parseFeedString
-        getMsg   = maybe (error "rss-item parsing failed!")  encodeString . getItemTitle
-
+        getTitle = maybe (error "rss-item parsing failed!") encodeString . getItemTitle
+        getLink = maybe (error "rss-item parsing failed!") encodeString . getItemLink

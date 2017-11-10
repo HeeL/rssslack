@@ -4,5 +4,5 @@ import Lib
 
 main :: IO ()
 main = do
-    rss <- getRss
-    print rss
+    (title, link) <- parseRss
+    print (title ++ ": " ++ link)
